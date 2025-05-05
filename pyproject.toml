@@ -12,5 +12,8 @@ dependencies = [
     "langchain",
     "langgraph",
     "typing-extensions",
-    "ipython"
+    "ipython",
+    "langchain-openai",
+    "pypdf>=5.4.0",
+    "load_dotenv"
 ]

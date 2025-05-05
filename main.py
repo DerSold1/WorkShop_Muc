@@ -4,35 +4,21 @@ Created on Wed Feb  5 14:09:12 2025
 
 @author: msoldner
 """
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import CharacterTextSplitter
-from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_openai import OpenAIEmbeddings
 import os
-from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import embeddings
-from langchain_openai import OpenAIEmbeddings
-
-from  langchain_core.embeddings import Embeddings
-import langchain_openai.embeddings.base
-#from langchain_openai.embeddings.base.OpenAIEmbeddings import embed_query
+from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
-from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_openai import OpenAIEmbeddings
-from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
+from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, ChatNVIDIA
 from langchain import hub
-from langchain_nvidia_ai_endpoints import ChatNVIDIA
-from langchain_core.documents import Document
-from typing_extensions import List, TypedDict
 from langgraph.graph import START, StateGraph
-from IPython.display import Image, display
-import getpass
+from typing_extensions import List, TypedDict
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #OPENAI_API_KEY = ""
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 SPLIT_CHUNK_SIZE = 100
 SPLIT_CHUNK_OVERLAP = 2
@@ -53,6 +39,33 @@ def generate(state: State):
     messages = prompt.invoke({"question": state["question"], "context": docs_content})
     response = llm.invoke(messages)
     return {"answer": response.content}
+def load_file(): 
+    # Specify the folder containing the PDF files
+    pdf_folder = "resource"
+
+    # List to store all pages from all PDFs
+    all_pages = []
+
+    # Iterate through all files in the folder
+    for filename in os.listdir(pdf_folder):
+        if filename.endswith(".pdf"):
+            file_path = os.path.join(pdf_folder, filename)
+            print(f"Loading: {file_path}")
+            
+            # Load the PDF
+            loader = PyPDFLoader(file_path)
+            
+            # Append pages to the list
+            for page in loader.lazy_load():
+                all_pages.append(page)
+
+    # Combine all pages into a single text string
+    text = "".join(page.page_content for page in all_pages)
+
+    print(f"Total characters loaded: {len(text)}")
+    return all_pages
+
+
 
 os.environ["NVIDIA_API_KEY"] = OPENAI_API_KEY
 
@@ -67,18 +80,19 @@ llm = ChatNVIDIA(model="meta/llama3-70b-instruct")
 
 
 '''Load the PDF Document. Adjust the link to your file'''
-loader = PyPDFLoader("Taycan-Porsche-Connect-Gut-zu-wissen-Die-Anleitung.pdf")
-pages = []
-for page in loader.lazy_load():
-    pages.append(page)
-text = ""
+docs = load_file()
+#loader = PyPDFLoader("Taycan-Porsche-Connect-Gut-zu-wissen-Die-Anleitung.pdf")
+#pages = []
+#for page in loader.lazy_load():
+#    pages.append(page)
+#text = ""
 
 #Extract document to string
-for document in loader.lazy_load():
+#for document in loader.lazy_load():
     #print(document)
-    text += document.page_content
-docs = pages    
-print(f"Total characters: {len(pages[0].page_content)}")
+#    text += document.page_content
+#docs = pages    
+#print(f"Total characters: {len(pages[0].page_content)}")
 
 
 
@@ -112,7 +126,7 @@ graph = graph_builder.compile()
 
 while True:
     print("Chatbot: Wie kann ich helfen?")
-    question = Input("Bitte Frage eingeben: ")
+    question = input("Bitte Frage eingeben: ")
     
     response = graph.invoke({"question": question})
     answer = response["answer"]
