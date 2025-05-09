@@ -7,5 +7,5 @@ a simple RAG demo
 - [uv](https://docs.astral.sh/uv/) installed on your system.
 
 ### Installation
-uv sync
-uv run main.py
+-uv sync
+-uv run main.py
