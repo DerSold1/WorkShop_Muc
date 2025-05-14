@@ -9,3 +9,7 @@ a simple RAG demo
 ### Installation
 -uv sync
 -uv run main.py
+
+### Further ToDos
+Copy your NVIDIA_API Key in ".env" after OPENAI_API_KEY= without ":
+OPENAI_API_KEY=nvapi-yourNvidiaApiKey
