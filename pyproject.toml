@@ -23,6 +23,5 @@ dependencies = [
 	"langchain_nvidia_ai_endpoints",
 	"typing_extensions",
 	"langgraph",
-	"IPython",
-	"getpass"
+	"IPython"
 ]
